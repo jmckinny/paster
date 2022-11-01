@@ -1,4 +1,4 @@
-use std::{fs::File, io::Write};
+use rocket::tokio::{fs::File, io::AsyncWriteExt};
 
 pub struct Paste {
     id: u64,
@@ -10,9 +10,10 @@ impl Paste {
         Paste { id, data }
     }
 
-    pub fn into_file(self) -> Result<(), std::io::Error> {
-        let mut file = File::create(format!("pastes/{}", self.id))?;
-        file.write_all(&self.data.bytes().collect::<Vec<u8>>())?;
+    pub async fn into_file(self) -> Result<(), std::io::Error> {
+        let mut file = File::create(format!("pastes/{}", self.id)).await?;
+        file.write_all(&self.data.bytes().collect::<Vec<u8>>())
+            .await?;
         Ok(())
     }
 }

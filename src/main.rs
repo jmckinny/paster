@@ -1,10 +1,11 @@
 #[macro_use]
 extern crate rocket;
+use rocket::tokio::fs::File;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use std::io::Read;
 
 use rocket::data::ToByteUnit;
+use rocket::tokio::io::AsyncReadExt;
 use rocket::Data;
 mod paste;
 
@@ -24,9 +25,9 @@ fn index() -> &'static str {
 }
 #[get("/<id>")]
 async fn get_paste(id: u64) -> std::io::Result<String> {
-    let mut file = std::fs::File::open(format!("pastes/{}", id))?;
+    let mut file = File::open(format!("pastes/{}", id)).await?;
     let mut data = String::new();
-    file.read_to_string(&mut data)?;
+    file.read_to_string(&mut data).await?;
     Ok(data)
 }
 
@@ -37,6 +38,6 @@ async fn new_paste(paste: Data<'_>) -> std::io::Result<String> {
     text.hash(&mut hasher);
     let id = hasher.finish();
     let item = paste::Paste::new(id, text);
-    item.into_file()?;
+    item.into_file().await?;
     Ok(id.to_string())
 }

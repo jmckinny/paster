@@ -4,8 +4,11 @@ use diesel::{Connection, RunQueryDsl, SqliteConnection};
 use paste::Paste;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
+use std::path::Path;
 
 use rocket::data::ToByteUnit;
+use rocket::fs::NamedFile;
+use rocket::response::status::NotFound;
 use rocket::Data;
 mod paste;
 
@@ -17,14 +20,11 @@ fn rocket() -> _ {
     rocket::build().mount("/", routes![index, new_paste, get_paste])
 }
 #[get("/")]
-fn index() -> &'static str {
-    "
-    USAGE
-      POST /paste/new
-          accepts raw data in the body of the request and responds with the id of the paste
-      GET /<id>
-          retrieves the content for the paste with id `<id>`
-    "
+async fn index() -> Result<NamedFile, NotFound<String>> {
+    let path = Path::new("pages/main.html");
+    NamedFile::open(&path)
+        .await
+        .map_err(|e| NotFound(e.to_string()))
 }
 #[get("/<query_id>")]
 fn get_paste(query_id: u64) -> std::io::Result<String> {
@@ -44,7 +44,7 @@ async fn new_paste(paste: Data<'_>) -> std::io::Result<String> {
     let text = paste.open(128.kibibytes()).into_string().await?.to_string();
     let mut hasher = DefaultHasher::new();
     text.hash(&mut hasher);
-    let id = hasher.finish() as i32;
+    let id = (hasher.finish() as i32).abs();
     let item = paste::Paste::new(id, text);
     let mut conn = establish_connection();
     diesel::insert_into(posts::table)

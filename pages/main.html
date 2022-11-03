@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Paster</title>
+  </head>
+  <body>
+    <h1>Paster</h1>
+    <p>
+    USAGE
+      POST /paste/new
+          accepts raw data in the body of the request and responds with the id of the paste
+      GET /&lt;id&gt;
+          retrieves the content for the paste with id `&lt;id&gt;`
+    </p>
+    <h2>Make a new post</h2>
+    <div>
+      <textarea id="input_box" name="Text to Paste" rows="4" cols="50"></textarea>
+      <br>
+      <button id="submit" onclick="submit()">Submit</button>
+    </div>
+    <script>
+      function submit(){
+        let text = document.getElementById("input_box").value;
+        console.info("Got data: `" + text +"`");
+        fetch("http://127.0.0.1:8000/paste/new",{
+          method: 'POST',
+          body: text
+        }).then(response => response.text()).then(response => alert("Text can be found at\nhttp://localhost:8000/" + response));
+      }
+    </script>
+  </body>
+</html>

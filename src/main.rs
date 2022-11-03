@@ -4,28 +4,21 @@ use diesel::{Connection, RunQueryDsl, SqliteConnection};
 use paste::Paste;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use std::path::Path;
 
 use rocket::data::ToByteUnit;
-use rocket::fs::NamedFile;
-use rocket::response::status::NotFound;
 use rocket::Data;
 mod paste;
-
+use rocket::fs::{relative, FileServer};
 pub mod schema;
 use diesel::prelude::*;
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![index, new_paste, get_paste])
+    rocket::build()
+        .mount("/", routes![new_paste, get_paste])
+        .mount("/", FileServer::from(relative!("static")))
 }
-#[get("/")]
-async fn index() -> Result<NamedFile, NotFound<String>> {
-    let path = Path::new("pages/main.html");
-    NamedFile::open(&path)
-        .await
-        .map_err(|e| NotFound(e.to_string()))
-}
+
 #[get("/<query_id>")]
 fn get_paste(query_id: u64) -> std::io::Result<String> {
     use self::schema::posts::dsl::*;

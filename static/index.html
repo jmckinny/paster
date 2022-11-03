@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Paster</title>
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
     <h1>Paster</h1>
@@ -21,15 +22,7 @@
       <br>
       <button id="submit" onclick="submit()">Submit</button>
     </div>
-    <script>
-      function submit(){
-        let text = document.getElementById("input_box").value;
-        console.info("Got data: `" + text +"`");
-        fetch("http://127.0.0.1:8000/paste/new",{
-          method: 'POST',
-          body: text
-        }).then(response => response.text()).then(response => alert("Text can be found at\nhttp://localhost:8000/" + response));
-      }
+    <script src="index.js">
     </script>
   </body>
 </html>

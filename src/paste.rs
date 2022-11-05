@@ -1,9 +1,5 @@
-use crate::schema::posts;
-use diesel::prelude::*;
 use rocket::tokio::{fs::File, io::AsyncWriteExt};
 
-#[derive(Insertable, Queryable)]
-#[diesel(table_name = posts)]
 pub struct Paste {
     id: i32,
     body: String,
@@ -19,9 +15,5 @@ impl Paste {
         file.write_all(&self.body.bytes().collect::<Vec<u8>>())
             .await?;
         Ok(())
-    }
-
-    pub fn get_data(&self) -> String {
-        self.body.clone()
     }
 }
